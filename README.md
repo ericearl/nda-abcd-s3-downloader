@@ -16,7 +16,7 @@ We recognize that users often want to download a subset of this collection, whet
 
 To use this downloader you must first have an NDA account and create a package containing the "DCAN Labs ABCD-BIDS MRI pipeline inputs and derivatives" collection from the [NDA website](https://ndar.nih.gov/):
 
-1. Navigate to the [NDA website](https://ndar.nih.gov/)and login to your account.
+1. Navigate to the [NDA website](https://ndar.nih.gov/) and login to your account.
 2. On the top navigation bar click "Get Data".
 3. On the side bar click "Data from Labs".
 4. Search for "DCAN Labs ABCD-BIDS Community Collection (ABCC)" in the Text Search.
@@ -31,10 +31,17 @@ To use this downloader you must first have an NDA account and create a package c
 
 The datastructure_manifest.txt is a metadata file associated with the data package that contains a list of S3 URLs for all of the data in the package. There is an API endpoint for this file that is currently under construction. Unfortunately the only way to download this file is by following the above instructions a second time but deselect "Include associated data files" when creating the Data Package.
 
-Download the Data Package containing your `datastructure_manifest.txt` to your system prior to running:
-`downloadcmd -dp data_package_id -d /download/output/directory`
+You will need to download this Data Package without associated data files to your system prior to being able to use this tool.
+One way is using the `downloadcmd` from the nda-tools repository, which looks like this:
 
-From more information on `downloadcmd` visit the [nda-tools GitHub Repository](https://github.com/NDAR/nda-tools). In order to install `downloadcmd`, you must install `nda-tools`.
+```shell
+downloadcmd -dp data_package_id -d /download/output/directory
+```
+
+For more information on `downloadcmd` visit the [nda-tools GitHub Repository](https://github.com/NDAR/nda-tools). In order to install `downloadcmd`, you must install `nda-tools`.
+
+Another way to download this data package is with [the NDA's Download Manager](https://nda.nih.gov/nda/nda-tools.html#download-manager).
+This GUI works on Windows, Mac, and Linux.
 
 Note: you will need to provide the path to your `datastructure_manifest.txt` file when running `download.py` with the `-m` flag.
 
