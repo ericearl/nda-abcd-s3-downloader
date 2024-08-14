@@ -1,4 +1,26 @@
-# NDA Collection 3165 ABCD-BIDS Downloader
+## :mega: Repository No Longer Being Maintained :mega:
+
+**We have adopted a new process for storing and sharing ABCD data and will therefore no longer be maintaining this repository!**
+
+
+### Interim Download Method:
+
+1. Create a package on the NDA following the same steps as our [s3 downloader](https://github.com/DCAN-Labs/nda-abcd-s3-downloader?tab=readme-ov-file#make-data-package-on-nda-website), with the specific adjustment of selecting only the file types that interest you from the "DCAN Labs ABCD-BIDS Community Collection (ABCC)." This selection process will likely involve checking multiple boxes. Please note that the NDA has introduced a two-month expiration date for their packages. If you require continued access beyond this timeframe, you will need to create a new package.
+
+2. Once your package has been successfully created on the NDA (be aware that this process may take some time), make sure your [NDA-tools](https://github.com/NDAR/nda-tools) installation is updated to version `0.2.25`.
+
+3. Verify that your credentials are correctly configured according to the same guidelines as for our [s3 downloader](https://github.com/DCAN-Labs/nda-abcd-s3-downloader?tab=readme-ov-file#nda-credentials).
+
+4. When ready to download your package, use the command below to retrieve the entire package.
+
+    ```
+    downloadcmd -dp data_package_id -d /download/output/directory
+    ```
+
+**Note:** Depending on your system's resources, you might want to create multiple packages in step one. Downloading a single file type from all subjects can take a lot of time.
+
+
+# :no_entry_sign: NDA Collection 3165 ABCD-BIDS Downloader :no_entry_sign:
 
 This tool can be used to download data from the DCAN Labs ABCD-BIDS Collection 3165 that is hosted on the NIMH Data Archive (NDA). This dataset includes ABCD BIDS inputs and derivatives from the abcd-hcp-pipeline, fMRIPrep, and QSIPrep.  All files are stored in Amazon Web Services (AWS) Simple Storage Service (S3) buckets and can only be accessed via the NDA API.
 
@@ -9,6 +31,14 @@ Collection 3165 is a massive dataset containing unprocessed BIDS formatted struc
 In the past users have been able to download data from any collection they have access to directly from S3 by using the token generator created by the NDA. This method has been deprecated and users are now required to first create a Data Package containing their desired data and then download data from their Packages using the APIs that the NDA created.
 
 We recognize that users often want to download a subset of this collection, whether it be the BIDS input data, the functional data processed with abcd-hcp-pipeline, the diffusion processed with QSIPrep or a more specific subset of data from a particular population of subjects. To accommodate we recommend users provide a text file containing a list of data subsets and subjects
+
+## Installation
+
+First, clone this repository, then install the necessary python dependencies outlined in the requirements.txt:
+
+`git clone https://github.com/DCAN-Labs/nda-abcd-s3-downloader.git`
+
+`python3 -m pip install -r nda-abcd-s3-downloader/requirements.txt --user`
 
 ## Requirements
 
@@ -45,30 +75,6 @@ This GUI works on Windows, Mac, and Linux.
 
 Note: you will need to provide the path to your `datastructure_manifest.txt` file when running `download.py` with the `-m` flag.
 
-## Recommended Inputs
-
-### data_subsets.txt
-
-Collection 3165 has grown to include multimodal data from several different pipelines. Downloading the entirety of this dataset will require 168TB of space and several days to download. We recommend that users selectively download the data types or data subsets that they wish to download. For ease of use a list of all possible data subsets is provided with this repository: `data_subsets.txt`.  If you would only like a subset of all possible data subsets you should copy only the data subset types that you want into a new `.txt` file and point to that when calling `download.py` with the `-d` option.
-
-### subject_list.txt
-
-By default all data subsets specified in the data_subsets.txt for ALL subjects will be downloaded. If data from only a sub population of subjects should be downloaded a .txt file with each unique BIDS formated subject ID on a new line must be provided to `download.py` with the `-s` option. Here is an example of what this file might look like for 3 subjects.
-
-```shell
-sub-NDARINVXXXXXXX
-sub-NDARINVYYYYYYY
-sub-NDARINVZZZZZZZ
-```
-
-### Python dependencies
-
-A list of all necessary pip installable dependencies can be found in requirements.txt. To install run the following command:
-
-```shell
-python3 -m pip install -r requirements.txt --user
-```
-
 ### NDA Credentials
 
 To improve security the NDA Token Generator has been deprecated and password storage in the settings.cfg and the password flag have been replaced with keyring. Keyring is a Python package that leverages the operating system's credential manager to securely store and retrieve a users credentials.
@@ -90,60 +96,79 @@ keyring.set_password("nda-tools", USERNAME, PASSWORD)
 
 If this is set up properly you should no longer have to enter your password manually when running the downloader.
 
+## Recommended Inputs
+
+### data_subsets.txt
+
+Collection 3165 has grown to include multimodal data from several different pipelines. Downloading the entirety of this dataset will require 168TB of space and several days to download. We recommend that users selectively download the data types or data subsets that they wish to download. For ease of use a list of all possible data subsets is provided with this repository: `data_subsets.txt`.  If you would only like a subset of all possible data subsets you should copy only the data subset types that you want into a new `.txt` file and point to that when calling `download.py` with the `-d` option.
+
+### subject_list.txt
+
+By default all data subsets specified in the data_subsets.txt for ALL subjects will be downloaded. If data from only a sub population of subjects should be downloaded a .txt file with each unique BIDS formated subject ID on a new line must be provided to `download.py` with the `-s` option. Here is an example of what this file might look like for 3 subjects.
+
+```shell
+sub-NDARINVXXXXXXX
+sub-NDARINVYYYYYYY
+sub-NDARINVZZZZZZZ
+```
+
+
 ## Usage
 
 For full usage documentation, type the following while inside your folder containing this cloned repository.
 
-```shell
+```
 python3 download.py -h
 
-usage: download.py [-h] -dp PACKAGE -m MANIFEST -o OUTPUT [-s SUBJECT_LIST_FILE]
-                   [-l LOG_FOLDER] [-d DATA_SUBSETS_FILE] [-wt WORKER_THREADS]
+usage: download.py [-h] [-dp <package-id>] -m MANIFEST_FILE -o OUTPUT 
+                   [-s SUBJECT_LIST_FILE] [-l LOG_FOLDER] 
+                   [-b BASENAMES_FILE][-wt <thread-count>]
 
 This python script takes in a list of data subsets and a list of
 subjects/sessions and downloads the corresponding files from NDA using the
-NDA provided AWS S3 links.
+NDA's provided AWS S3 links.
 
 required arguments:
-  -dp, --package        Package ID of the NDA data package.
-  -m, --manifest
-                        Path to the datstructure_manifest.txt file 
-                        downloaded from the NDA containing s3 links for all 
-                        subjects and their derivatives.
-  -o, --output
+  -dp <package-id>,    --package <package-id>
+                        Flags to download all S3 files in package.
+  -m MANIFEST_FILE,    --manifest MANIFEST_FILE
+                        Path to the .csv file downloaded from the NDA
+                        containing s3 links for all subjects and their
+                        derivatives.
+  -o OUTPUT,           --output OUTPUT
                         Path to root folder which NDA data will be downloaded
                         into. A folder will be created at the given path if
                         one does not already exist.
-
 optional arguments:
-  -h, --help            Show this help message and exit.
-  -s, --subject-list
+  -h,                   --help    
+                        Show this help message and exit.
+  -s SUBJECT_LIST_FILE, --subject-list SUBJECT_LIST_FILE
                         Path to a .txt file containing a list of subjects for
                         which derivatives and inputs will be downloaded. By
                         default without providing input to this argument all
                         available subjects are selected.
-  -l, --logs
+  -l LOG_FOLDER,        --logs LOG_FOLDER
                         Path to existent folder to contain your download
                         success and failure logs. By default, the logs are
                         output to your home directory: ~/
-  -d, --data-subsets-file 
+  -b BASENAMES_FILE,    --basenames-file BASENAMES_FILE
                         Path to a .txt file containing a list of all the data
-                        subset names to download for each subject. By default
-                        all the possible derivatives and inputs will be will
-                        be used. This is the data_subsets.txt file included in
-                        this repository. To select a subset it is recomended
-                        that you simply copy this file and remove all the
-                        basenames that you do not want.
-  -wt, --workerThreads
+                        basenames names to download for each subject. By
+                        default all the possible derivatives and inputs will
+                        be will be used. This is the data_subsets.txt file
+                        included in this repository. To select a subset it is
+                        recomended that you simply copy this file and remove
+                        all the basenames that you do not want.
+  -wt <thread-count>,   --workerThreads <thread-count>
                         Specifies the number of downloads to attempt in
-                        parallel. For example, running downloadcmd -dp 12345
-                        -wt 10 will cause the program to download a maximum
+                        parallel. For example, running 'downloadcmd -dp 12345
+                        -wt 10' will cause the program to download a maximum
                         of 10 files simultaneously until all of the files from
                         package 12345 have been downloaded. A default value is
                         calculated based on the number of cpus found on the
                         machine, however a higher value can be chosen to
                         decrease download times. If this value is set too high
                         the download will slow. With 32 GB of RAM, a value of
-                        10 is probably close to the maximum number of
-                        parallel downloads that the computer can handle
+                        '10' is probably close to the maximum number of
+                        parallel downloads that the computer can handle.
 ```
